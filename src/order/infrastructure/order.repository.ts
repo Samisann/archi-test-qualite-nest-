@@ -40,4 +40,5 @@ export default class OrderRepository
 
     await queryBuilder.delete().execute();
   }
+  
 }

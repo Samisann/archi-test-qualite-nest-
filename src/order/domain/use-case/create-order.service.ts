@@ -2,15 +2,21 @@
 import { BadRequestException } from '@nestjs/common';
 import { Order } from '../entity/order.entity';
 import OrderRepository from 'src/order/infrastructure/order.repository';
+import { v4 as uuidv4 } from 'uuid';
 
 class CreateOrderService {
-  async createOrder(order: any): Promise<void> {
+  private orders: Order[] = [];
+  async createOrder(order: any): Promise<Order> {
     const checkOrder = await this.checkOrder(order);
     if (checkOrder !== true) {
       throw new BadRequestException(checkOrder);
     }
-
-    return order;
+    const newOrder = new Order();
+    Object.assign(newOrder, order);
+    newOrder.id = uuidv4();
+    this.orders.push(newOrder);
+    console.log('newOrder', newOrder);
+    return newOrder;
   }
 
   async checkOrder(order: any): Promise<boolean | string> {

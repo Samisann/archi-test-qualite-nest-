@@ -51,4 +51,9 @@ export class Order {
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   paidAt: Date | null;
+
+  pay() {
+    this.status = 'paid';
+    this.paidAt = new Date();
+  }
 }
