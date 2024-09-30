@@ -6,17 +6,38 @@ import { v4 as uuidv4 } from 'uuid';
 
 class CreateOrderService {
   private orders: Order[] = [];
-  async createOrder(order: any): Promise<Order> {
-    const checkOrder = await this.checkOrder(order);
-    if (checkOrder !== true) {
-      throw new BadRequestException(checkOrder);
+  async createOrder(orderData: any): Promise<Order> {
+    
+    const validationMessage = await this.checkOrder(orderData);
+    if (validationMessage !== true) {
+      throw new BadRequestException(validationMessage);
     }
+
+    
     const newOrder = new Order();
-    Object.assign(newOrder, order);
-    newOrder.id = uuidv4();
+    newOrder.id = this.generateOrderId(); 
+    newOrder.customerName = orderData.customerName;
+    newOrder.shippingAddress = orderData.shippingAddress;
+    newOrder.invoiceAddress = orderData.invoiceAddress;
+    newOrder.orderItems = orderData.orderItems;
+    newOrder.price = this.calculateTotalPrice(orderData.orderItems);
+    newOrder.status = "paid"; 
+    newOrder.createdAt = new Date(); 
+
+
     this.orders.push(newOrder);
-    console.log('newOrder', newOrder);
-    return newOrder;
+
+    return newOrder; 
+}
+
+ 
+    private calculateTotalPrice(orderItems: any[]): number {
+      return orderItems.reduce((sum, item) => sum + item.price, 0);
+  }
+
+
+  private generateOrderId(): string {
+      return 'order-' + Math.random().toString(36).substr(2, 9); 
   }
 
   async checkOrder(order: any): Promise<boolean | string> {

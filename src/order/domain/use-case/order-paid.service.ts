@@ -19,7 +19,7 @@ class orderPaidService {
     return order;
   }
 
-  addOrder(order: Order):void {
+  addOrder(order: Order): void {
     this.orders.push(order);
   }
 

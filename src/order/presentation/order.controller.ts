@@ -16,7 +16,7 @@ export default class OrderController {
 
   @Post('createOrder')
   async createOrder(@Body() order: any) {
-    const newOrder = this.CreateOrderService.createOrder(order);
+    const newOrder = await this.CreateOrderService.createOrder(order);
     this.orderPaidService.addOrder(newOrder);
 
     return newOrder;
