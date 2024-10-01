@@ -21,7 +21,6 @@ class CreateOrderService {
     newOrder.invoiceAddress = orderData.invoiceAddress;
     newOrder.orderItems = orderData.orderItems;
     newOrder.price = this.calculateTotalPrice(orderData.orderItems);
-    newOrder.status = "paid"; 
     newOrder.createdAt = new Date(); 
 
 

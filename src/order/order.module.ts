@@ -5,7 +5,7 @@ import OrderController from './presentation/order.controller';
 import { Order } from './domain/entity/order.entity';
 import { OrderItem } from './domain/entity/order-item.entity';
 import CreateOrderService from './domain/use-case/create-order.service';
-import orderPaidService from './domain/use-case/order-paid.service';
+import orderPaidService from './domain/use-case/PayOrder.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem])],

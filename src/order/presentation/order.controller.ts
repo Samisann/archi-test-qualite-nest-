@@ -1,6 +1,6 @@
 import { BadRequestException, Controller, Get } from '@nestjs/common';
 import CreateOrderService from '../domain/use-case/create-order.service';
-import orderPaidService from '../domain/use-case/order-paid.service';
+import orderPaidService from '../domain/use-case/PayOrder.service';
 import { Body, Post, Param } from '@nestjs/common';
 
 @Controller('/orders')
@@ -25,10 +25,7 @@ export default class OrderController {
 
   @Post('pay/:orderId')
   async payOrder(@Param('orderId') orderId: string) {
-    const paidOrder = await this.orderPaidService.paid(orderId);
-    return {
-        message: 'Order paid successfully',
-        order: paidOrder,
-    };
+    return this.orderPaidService.payOrder(orderId);
+  
   }
 }
