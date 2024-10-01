@@ -52,24 +52,45 @@ export class Order {
 
   @Column()
   @Expose({ groups: ['group_orders'] })
-  private status: string;
+   status: string;
 
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   paidAt: Date | null;
 
   pay(): void {
-
     if (this.price > 500) {
       throw new Error('Order is more than 500 euros');
     }
-    
-    if (this.status !== OrderStatus.PENDING) {
-      throw new Error('Order is not pending');
-    }
+
 
 
     this.status = OrderStatus.PAID;
     this.paidAt = new Date();
+  }
+  addDelivery(newAddress: string): void {
+    if (this.orderItems.length <= 3) {
+      throw new Error(
+        'Cannot add shipping address, your order must contain more than 3 items.',
+      );
+    }
+
+    if (
+      this.status !== OrderStatus.PENDING &&
+      this.shippingAddressSetAt === null
+    ) {
+      throw new Error(
+        'Cannot add shipping address, your order must be pending or already have a shipping address.',
+      );
+    }
+
+    this.shippingAddress = newAddress;
+
+   
+    this.price += 5;
+    
+
+
+    this.shippingAddressSetAt = new Date();
   }
 }
