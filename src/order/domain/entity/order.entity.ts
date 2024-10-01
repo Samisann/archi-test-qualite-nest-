@@ -32,6 +32,9 @@ export class Order {
 
   static SHIPPING_COST = 5;
 
+  // tab to store the items 
+
+
   @CreateDateColumn()
   @Expose({ groups: ['group_orders'] })
   createdAt: Date;
@@ -68,15 +71,43 @@ export class Order {
 
   @Column()
   @Expose({ groups: ['group_orders'] })
-  private status: string;
+   status: string;
 
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   private paidAt: Date | null;
 
-  constructor(createOrderCommand: CreateOrderCommand) {
-    const { items, customerName, shippingAddress, invoiceAddress } =
-      createOrderCommand;
+  
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+  private canceledAt: Date | null;
+
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+  private canceledReason: string | null;
+
+  setInvoiceAddress(invoiceAddress: string) {
+    if (!this.shippingAddress) {
+      throw new BadRequestException(
+        "L'adresse de facturation ne peut être définie que si l'adresse de livraison est remplie",
+      );
+    }
+
+    this.invoiceAddress = invoiceAddress;
+  }
+
+
+  cancel(reason: string): void {
+
+    this.status = OrderStatus.CANCELED;
+    this.canceledAt = new Date();
+    this.canceledReason = reason;
+  }
+
+  constructor(createOrderCommand?: CreateOrderCommand) {
+    if(!createOrderCommand) return;
+
+    const { items, customerName, shippingAddress, invoiceAddress } = createOrderCommand;
 
     // Validation
     if (
@@ -96,7 +127,7 @@ export class Order {
     }
 
     const totalAmount = this.calculateOrderAmount(items);
-
+    this.id = "order_" + Math.random().toString(36).substr(2, 9);
     this.customerName = customerName;
     this.orderItems = items.map((item) => {
       const orderItem = new OrderItem();
@@ -108,6 +139,8 @@ export class Order {
     this.price = totalAmount;
     this.status = OrderStatus.PENDING;
     this.createdAt = new Date();
+
+    
   }
 
   private calculateOrderAmount(items: ItemDetailCommand[]): number {

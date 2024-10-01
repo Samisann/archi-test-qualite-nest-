@@ -5,7 +5,7 @@ import OrderRepository from 'src/order/infrastructure/order.repository';
 export class PayOrderService {
   constructor(private readonly orderRepository: OrderRepository) {}
 
-  public async execute(orderId: string): Promise<Order> {
+  public async execute(orderId: any): Promise<Order> {
     const order = await this.orderRepository.findById(orderId);
 
     if (!order) {
@@ -17,3 +17,4 @@ export class PayOrderService {
     return this.orderRepository.save(order);
   }
 }
+export default PayOrderService;
