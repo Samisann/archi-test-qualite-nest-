@@ -15,6 +15,8 @@ export interface CreateOrderCommand {
   customerName: string;
   shippingAddress: string;
   invoiceAddress: string;
+  customerEmail: string;
+  customerPhoneNumber: string;
 }
 
 export enum OrderStatus {
@@ -28,6 +30,7 @@ export enum OrderStatus {
 
 @Entity()
 export class Order {
+
   static MAX_ITEMS = 5;
 
   static AMOUNT_MINIMUM = 5;
@@ -85,6 +88,16 @@ export class Order {
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   private cancelReason: string | null;
+    // customerEmail
+    // customerPhoneNumber
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+   customerEmail: string | null;
+
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+   customerPhoneNumber: string | null;
+  
 
   // methode factory : permet de ne pas utiliser le constructor
   // car le constructor est utilisé par typeorm
