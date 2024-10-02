@@ -1,16 +1,16 @@
-import { BadRequestException } from '@nestjs/common';
-import { CreateOrderCommand, Order } from 'src/order/domain/entity/order.entity';
-import OrderRepository from 'src/order/infrastructure/order.repository';
+import { OrderRepositoryInterface } from 'src/order/domain/port/order.repository.interface';
+import { CreateOrderCommand, Order } from '../entity/order.entity';
 
+export class CreateOrderService {
+  // j'injecte l'interface dans le constructeur
+  // le système d'injection de Nest JS va me permettre
+  // de configurer dans le orderModule quelle classe va reellement être injectée
+  // (il faut bien sûr que la classe en question implémente l'interface, sinon ça n'est pas possible)
+  constructor(private readonly orderRepository: OrderRepositoryInterface) {}
 
-
-export class CreateOrderService{
-  constructor(private readonly orderRepository: OrderRepository) {}
   async execute(createOrderCommand: CreateOrderCommand): Promise<Order> {
     const order = new Order(createOrderCommand);
-    const repository = await this.orderRepository.save(order);
 
-
-    return repository;
+    return await this.orderRepository.save(order);
   }
 }
