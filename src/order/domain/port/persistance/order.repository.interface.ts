@@ -1,4 +1,4 @@
-import { Order } from '../entity/order.entity';
+import { Order } from '../../entity/order.entity';
 
 export interface OrderRepositoryInterface {
   save(order: Order): Promise<Order>;

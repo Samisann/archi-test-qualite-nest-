@@ -1,4 +1,4 @@
-import { OrderRepositoryInterface } from 'src/order/domain/port/order.repository.interface';
+import { OrderRepositoryInterface } from 'src/order/domain/port/persistance/order.repository.interface';
 import { CreateOrderCommand, Order } from '../../domain/entity/order.entity';
 
 export class CreateOrderService {

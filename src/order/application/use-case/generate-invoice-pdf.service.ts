@@ -1,27 +1,16 @@
-import { OrderRepositoryInterface } from 'src/order/domain/port/order.repository.interface';
-import { generatePdfInterface } from 'src/order/domain/port/generate-invoice-pdf.interface';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
-import { Order } from 'src/order/domain/entity/order.entity';
-
-export class GenerateOrderPdfService {
+import { PdfGeneratorServiceInterface } from 'src/order/domain/port/pdf/generate-invoice-pdf.service.interface';
+import { OrderRepositoryInterface } from 'src/order/domain/port/persistance/order.repository.interface';
+export class GenerateInvoiceService {
   constructor(
     private readonly orderRepository: OrderRepositoryInterface,
-    private readonly pdfGenerator: generatePdfInterface,
+    private readonly pdfGeneratorService: PdfGeneratorServiceInterface,
   ) {}
-
-  async execute(orderId: string): Promise<Buffer> {
+  async generateInvoice(orderId: string): Promise<Buffer> {
     const order = await this.orderRepository.findById(orderId);
-
     if (!order) {
-      throw new NotFoundException('Order not found');
+      throw new Error('Order not found');
     }
-
-    if (!order.isPaid()) {
-      throw new BadRequestException('Cannot generate invoice for unpaid order');
-    }
-
-    const items = order.getOrderItemsForPdf();
-
-    return this.pdfGenerator.generateOrderPdf(order.id, items);
+    const invoiceInfos = order.getInvoiceInfos();
+    return this.pdfGeneratorService.generatePdf(invoiceInfos);
   }
 }

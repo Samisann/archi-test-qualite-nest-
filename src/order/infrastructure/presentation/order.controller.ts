@@ -7,7 +7,7 @@ import { CreateOrderService } from 'src/order/application/use-case/create-order.
 import { PayOrderService } from 'src/order/application/use-case/pay-order.service';
 import { Response } from 'express';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { GenerateOrderPdfService } from 'src/order/application/use-case/generate-invoice-pdf.service';
+import { GenerateInvoiceService } from 'src/order/application/use-case/generate-invoice-pdf.service';
 
 
 @Controller('/orders')
@@ -15,7 +15,7 @@ export default class OrderController {
   constructor(
     private readonly createOrderService: CreateOrderService,
     private readonly payOrderService: PayOrderService,
-    private readonly GenerateOrderPdfService: GenerateOrderPdfService,
+    private readonly GenerateOrderPdfService: GenerateInvoiceService,
     
   ) {}
 
@@ -35,8 +35,7 @@ export default class OrderController {
   async generateInvoice(@Param('orderId') orderId: string, @Res() res: Response) {
     try {
 
-      const pdfBuffer = await this.GenerateOrderPdfService.execute(orderId);
-
+      const pdfBuffer = await this.GenerateOrderPdfService.generateInvoice(orderId);
 
       res.set({
         'Content-Type': 'application/pdf',

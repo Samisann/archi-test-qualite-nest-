@@ -12,12 +12,10 @@ import { BadRequestException } from '@nestjs/common';
 
 export interface CreateOrderCommand {
   items: ItemDetailCommand[];
-  id: string;
   customerName: string;
   shippingAddress: string;
   invoiceAddress: string;
-  customerEmail: string;
-  customerPhoneNumber: string;
+
 }
 
 export enum OrderStatus {
@@ -31,7 +29,6 @@ export enum OrderStatus {
 
 @Entity()
 export class Order {
-
   static MAX_ITEMS = 5;
 
   static AMOUNT_MINIMUM = 5;
@@ -39,6 +36,10 @@ export class Order {
   static AMOUNT_MAXIMUM = 500;
 
   static SHIPPING_COST = 5;
+
+  public setStatus(status: string): void {
+    this.status = status;
+  }
 
   @CreateDateColumn()
   @Expose({ groups: ['group_orders'] })
@@ -89,16 +90,15 @@ export class Order {
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   private cancelReason: string | null;
-    // customerEmail
-    // customerPhoneNumber
+  // customerEmail
+  // customerPhoneNumber
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
-   customerEmail: string | null;
+  customerEmail: string | null;
 
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
-   customerPhoneNumber: string | null;
-  
+  customerPhoneNumber: string | null;
 
   // methode factory : permet de ne pas utiliser le constructor
   // car le constructor est utilisé par typeorm
@@ -228,14 +228,28 @@ export class Order {
     this.cancelReason = cancelReason;
   }
 
-  getOrderItemsForPdf(): any[] {
+    getOrderItemsForPdf(): any[] {
     return this.orderItems.map((item) => ({
       name: item.productName,
       price: item.price,
     }));
   }
+  getInvoiceInfos(): string {
+    if (
+      this.status !== OrderStatus.PAID &&
+      this.status !== OrderStatus.SHIPPED &&
+      this.status !== OrderStatus.DELIVERED
+    ) {
+      throw new Error('Order is not paid');
+    }
+    const itemsNames = this.orderItems
+      .map((item) => item.productName)
+      .join(', ');
+    return `invoice number ${this.id}, with items: ${itemsNames}`;
+  }
 
   isPaid(): boolean {
     return this.status === OrderStatus.PAID;
   }
+
 }
