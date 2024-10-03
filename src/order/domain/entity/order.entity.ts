@@ -191,7 +191,7 @@ export class Order {
       throw new Error('Commande non payée');
     }
 
-    if (this.orderItems.length < Order.MAX_ITEMS) {
+    if (this.orderItems.length > Order.MAX_ITEMS) {
       throw new Error('Trop d’articles');
     }
 
