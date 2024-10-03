@@ -12,6 +12,7 @@ import { BadRequestException } from '@nestjs/common';
 
 export interface CreateOrderCommand {
   items: ItemDetailCommand[];
+  id: string;
   customerName: string;
   shippingAddress: string;
   invoiceAddress: string;
@@ -225,5 +226,16 @@ export class Order {
     this.status = OrderStatus.CANCELED;
     this.cancelAt = new Date('NOW');
     this.cancelReason = cancelReason;
+  }
+
+  getOrderItemsForPdf(): any[] {
+    return this.orderItems.map((item) => ({
+      name: item.productName,
+      price: item.price,
+    }));
+  }
+
+  isPaid(): boolean {
+    return this.status === OrderStatus.PAID;
   }
 }
