@@ -26,15 +26,12 @@ class OrderRepositoryFake implements OrderRepositoryInterface {
   }
 
   async save(order: Order): Promise<Order> {
-    
     const existingOrderIndex = this.orders.findIndex(
       (existingOrder) => existingOrder.id === order.id,
     );
     if (existingOrderIndex !== -1) {
-      
       this.orders[existingOrderIndex] = order;
     } else {
-      
       this.orders.push(order);
     }
     return order;
@@ -62,12 +59,12 @@ describe('SetInvoiceAddressOrderService', () => {
       items: [{ productName: 'item 1', price: 10, quantity: 1 }],
       customerName: 'John Doe',
       shippingAddress: 'Shipping Address',
-      invoiceAddress: 'Invoice Address', 
+      invoiceAddress: 'Invoice Address',
     };
 
     const order = new Order(createOrderCommand);
-   
-    order.setStatus(OrderStatus.SHIPPING_ADDRESS_SET); 
+
+    order.setStatus(OrderStatus.SHIPPING_ADDRESS_SET);
 
     await orderRepositoryFake.save(order);
 
@@ -82,11 +79,11 @@ describe('SetInvoiceAddressOrderService', () => {
 
     expect(updatedOrder.invoiceAddress).toBe('New Invoice Address');
   });
-  it('should throw NotFoundException if the order doesn\'t exist', async () => {
+  it("should throw NotFoundException if the order doesn't exist", async () => {
     const setInvoiceAddressService = new SetInvoiceAddressOrderService(
       orderRepositoryFake,
     );
-  
+
     await expect(
       setInvoiceAddressService.execute(
         'non-existent-order-id',
@@ -94,32 +91,31 @@ describe('SetInvoiceAddressOrderService', () => {
       ),
     ).rejects.toThrow(NotFoundException);
   });
-  
+
   it('should set the invoice address if the order exists', async () => {
     const createOrderCommand: CreateOrderCommand = {
-      items: [{ productName: 'item 1', price: 10, quantity: 1 }],
+      items: [{ id: '1', productName: 'item 1', price: 10, quantity: 1 }],
       customerName: 'John Doe',
       shippingAddress: 'Shipping Address',
       invoiceAddress: 'Invoice Address',
     };
-  
+
     const order = new Order(createOrderCommand);
-    
-   
-    order.setShippingAddress('Shipping Address'); 
-    order.setStatus(OrderStatus.SHIPPING_ADDRESS_SET); 
-  
+
+    order.setShippingAddress('Shipping Address');
+    order.setStatus(OrderStatus.SHIPPING_ADDRESS_SET);
+
     await orderRepositoryFake.save(order);
-  
+
     const setInvoiceAddressService = new SetInvoiceAddressOrderService(
       orderRepositoryFake,
     );
-  
+
     const updatedOrder = await setInvoiceAddressService.execute(
       order.id,
       'New Invoice Address',
     );
-  
+
     expect(updatedOrder.invoiceAddress).toBe('New Invoice Address');
   });
 });

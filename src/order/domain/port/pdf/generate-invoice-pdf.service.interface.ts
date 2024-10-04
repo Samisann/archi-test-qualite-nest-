@@ -1,3 +1,3 @@
 export interface PdfGeneratorServiceInterface {
-    generatePdf(text: string): Promise<Buffer>;
+    // generatePdf(text: string): Promise<Buffer>;
   }

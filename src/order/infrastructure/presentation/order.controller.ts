@@ -9,14 +9,12 @@ import { Response } from 'express';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { GenerateInvoiceService } from 'src/order/application/use-case/generate-invoice-pdf.service';
 
-
 @Controller('/orders')
 export default class OrderController {
   constructor(
     private readonly createOrderService: CreateOrderService,
     private readonly payOrderService: PayOrderService,
     private readonly GenerateOrderPdfService: GenerateInvoiceService,
-    
   ) {}
 
   @Post()
@@ -31,21 +29,21 @@ export default class OrderController {
     return await this.payOrderService.execute(id);
   }
 
-  @Get(':orderId/invoice')
-  async generateInvoice(@Param('orderId') orderId: string, @Res() res: Response) {
-    try {
+  // @Get(':orderId/invoice')
+  // async generateInvoice(@Param('orderId') orderId: string, @Res() res: Response) {
+  //   try {
 
-      const pdfBuffer = await this.GenerateOrderPdfService.generateInvoice(orderId);
+  //     const pdfBuffer = await this.GenerateOrderPdfService.generateInvoice(orderId);
 
-      res.set({
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="invoice-${orderId}.pdf"`,
-      });
+  //     res.set({
+  //       'Content-Type': 'application/pdf',
+  //       'Content-Disposition': `attachment; filename="invoice-${orderId}.pdf"`,
+  //     });
 
-      res.send(pdfBuffer);
-    } catch (error) {
+  //     res.send(pdfBuffer);
+  //   } catch (error) {
 
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
-  }
+  //     throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 }

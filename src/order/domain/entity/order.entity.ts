@@ -1,4 +1,5 @@
 import { ItemDetailCommand, OrderItem } from '../entity/order-item.entity';
+
 import {
   Column,
   CreateDateColumn,
@@ -9,13 +10,16 @@ import {
 import { Expose } from 'class-transformer';
 
 import { BadRequestException } from '@nestjs/common';
+import { ProductRepositoryInterface } from 'src/product/domain/port/persistance/product-repository.interface';
+import { DiscountRepositoryInterface } from 'src/product/domain/port/persistance/discount-repository-interface';
+import { Discount } from 'src/product/domain/entity/discount.entity';
 
 export interface CreateOrderCommand {
   items: ItemDetailCommand[];
   customerName: string;
   shippingAddress: string;
   invoiceAddress: string;
-
+  code?: string;
 }
 
 export enum OrderStatus {
@@ -29,6 +33,9 @@ export enum OrderStatus {
 
 @Entity()
 export class Order {
+  private productRepository: ProductRepositoryInterface;
+  private discountRepository: DiscountRepositoryInterface;
+
   static MAX_ITEMS = 5;
 
   static AMOUNT_MINIMUM = 5;
@@ -119,8 +126,15 @@ export class Order {
   //   return this;
   // }
 
-  public constructor(createOrderCommand?: CreateOrderCommand) {
-    if (!createOrderCommand) {
+  public constructor(
+    createOrderCommand?: CreateOrderCommand,
+    productRepository?: ProductRepositoryInterface,
+    discountRepository?: DiscountRepositoryInterface,
+  ) {
+    this.productRepository = productRepository;
+    this.discountRepository = discountRepository;
+
+    if (!createOrderCommand || !productRepository) {
       return;
     }
 
@@ -138,11 +152,36 @@ export class Order {
     this.price = this.calculateOrderAmount(createOrderCommand.items);
   }
 
+  addItem(item: ItemDetailCommand) {
+    if (this.status !== OrderStatus.PENDING) {
+      throw new Error('Order is not in PENDING status');
+    }
+
+    const product = this.productRepository.findById(item.id);
+
+    const items = new OrderItem({
+      id: item.id,
+      productName: item.productName,
+      price: item.price,
+      quantity: item.quantity,
+    });
+
+    this.orderItems.push(items);
+    this.price += item.price * item.quantity;
+    this.productRepository.decrement(product, item.quantity);
+  }
+
   private verifyMaxItemIsValid(createOrderCommand: CreateOrderCommand) {
     if (createOrderCommand.items.length > Order.MAX_ITEMS) {
       throw new BadRequestException(
         'Cannot create order with more than 5 items',
       );
+    }
+  }
+
+  applyDiscount(discount: Discount) {
+    if (discount) {
+      this.price -= discount.amount;
     }
   }
 
@@ -228,7 +267,7 @@ export class Order {
     this.cancelReason = cancelReason;
   }
 
-    getOrderItemsForPdf(): any[] {
+  getOrderItemsForPdf(): any[] {
     return this.orderItems.map((item) => ({
       name: item.productName,
       price: item.price,
@@ -251,5 +290,4 @@ export class Order {
   isPaid(): boolean {
     return this.status === OrderStatus.PAID;
   }
-
 }

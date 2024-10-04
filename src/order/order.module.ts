@@ -14,21 +14,27 @@ import { SetInvoiceAddressOrderService } from './application/use-case/set-invoic
 import { GenerateInvoiceService } from './application/use-case/generate-invoice-pdf.service';
 import { PdfGeneratorService } from './infrastructure/pdf/generate-pdf.service';
 import { PdfGeneratorServiceInterface } from './domain/port/pdf/generate-invoice-pdf.service.interface';
+import { EmailService } from 'src/product/infrastructure/presentation/email.service';
+import { EmailServiceInterface } from 'src/product/domain/port/persistance/email-service.interface';
+import { ProductRepositoryInterface } from 'src/product/domain/port/persistance/product-repository.interface';
+import { ProductRepositoryImpl } from 'src/product/infrastructure/bdd/product-repository';
+import { DiscountRepositoryImpl } from 'src/product/infrastructure/bdd/discount-repository';
+import { DiscountRepositoryInterface } from 'src/product/domain/port/persistance/discount-repository-interface';
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem])],
   controllers: [OrderController],
 
   providers: [
-    
     OrderRepositoryTypeOrm,
     PdfGeneratorService,
+    EmailService,
     {
       provide: GenerateInvoiceService,
       useFactory: (
         orderRepository: OrderRepositoryInterface,
         pdfGeneratorService: PdfGeneratorServiceInterface,
       ) => {
-        return new GenerateInvoiceService(orderRepository, pdfGeneratorService);
+        return new GenerateInvoiceService();
       },
       inject: [OrderRepositoryTypeOrm, PdfGeneratorService],
     },
@@ -62,10 +68,20 @@ import { PdfGeneratorServiceInterface } from './domain/port/pdf/generate-invoice
     },
     {
       provide: CreateOrderService,
-      useFactory: (orderRepository: OrderRepositoryInterface) => {
-        return new CreateOrderService(orderRepository);
+      useFactory: (
+        orderRepository: OrderRepositoryInterface,
+        productRepository: ProductRepositoryInterface,
+        emailService: EmailServiceInterface,
+        discountService: DiscountRepositoryInterface,
+      ) => {
+        return new CreateOrderService(
+          orderRepository,
+          productRepository,
+          emailService,
+          discountService,
+        );
       },
-      inject: [OrderRepositoryTypeOrm],
+      inject: [OrderRepositoryTypeOrm, EmailService, ProductRepositoryImpl, DiscountRepositoryImpl],
     },
   ],
 })
